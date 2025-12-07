@@ -1,0 +1,135 @@
+package: cloud.lazycat.app.sebastiaan.zitadel
+version: 4.3.1
+
+name: zitadel
+keyword: identity,iam,auth,zitadel
+description: Open-source identity and access management platform for modern applications.
+
+locales:
+  en:
+    name: Zitadel
+    description: |
+      ## Zitadel Identity and Access Management
+
+      **Official Site:** https://zitadel.com/
+      **Repository:** https://github.com/lazycatapps/zitadel.git
+
+      Zitadel is an open-source identity and access management (IAM) platform that provides enterprise-grade authentication and authorization solutions for modern applications. It supports multi-tenant architecture and delivers complete OAuth 2.0, OpenID Connect (OIDC), and SAML 2.0 standard protocols, enabling teams to rapidly build secure and reliable login and authorization systems.
+
+      ## Key Features
+
+      - **Multi-Protocol Support**: OAuth 2.0, OpenID Connect, SAML 2.0
+      - **Multi-Tenant Architecture**: Independent management of multiple organizations and projects
+      - **Custom Login Interface**: Provides Login UI v2 with brand customization
+      - **Multi-Factor Authentication**: Supports TOTP, WebAuthn, SMS, and other authentication methods
+      - **User Management**: Complete user lifecycle management and access control
+      - **Audit Logging**: Detailed operation audit and security event tracking
+      - **API First**: Provides complete REST and gRPC APIs
+      - **Internationalization**: Multi-language interface support
+      - **High Performance**: Built with Go language for exceptional performance
+      - **Mobile Friendly**: Supports authentication integration for mobile applications
+
+      **Important**:
+      - The login username will automatically append `@org-name.domain` suffix
+      - Please change the default password immediately after first login to ensure security!
+
+      ## Use Cases
+
+      - Enterprise Single Sign-On (SSO)
+      - Multi-tenant SaaS application authentication
+      - API access control
+      - Microservices security gateway
+      - B2B/B2C identity management
+
+license: https://github.com/zitadel/zitadel?tab=AGPL-3.0-1-ov-file
+homepage: https://github.com/zitadel/zitadel
+author: sebastiaan
+
+ext_config:
+  disable_grpc_web_on_root: true # 不劫持 grpc-web 流量 (配合新版 sdk)
+
+application:
+  background_task: true
+  subdomain: zitadel
+  upstreams:
+    - location: /ui/v2/login/
+      backend: http://login:3000/ui/v2/login/
+      use_backend_host: false
+    - location: /
+      backend: http://zitadel:8080
+      use_backend_host: false
+  public_path:
+    - /
+  depends_on:
+    - zitadel
+  multi_instance: false
+
+services:
+  zitadel:
+    restart: unless-stopped
+    image: ghcr.io/zitadel/zitadel:latest
+    user: root
+    command: start-from-init --masterkey "{{ .MASTER_KEY }}"
+    environment:
+      - ZITADEL_EXTERNALPORT=443
+      - ZITADEL_EXTERNALDOMAIN=${LAZYCAT_APP_DOMAIN}
+      - ZITADEL_EXTERNALSECURE=true
+      - ZITADEL_EXTERNALPROTOCOL=https
+      - ZITADEL_TLS_ENABLED=false
+      - ZITADEL_DATABASE_POSTGRES_HOST=db
+      - ZITADEL_DATABASE_POSTGRES_PORT=5432
+      - ZITADEL_DATABASE_POSTGRES_DATABASE=zitadel
+      - ZITADEL_DATABASE_POSTGRES_ADMIN_USERNAME=postgres
+      - ZITADEL_DATABASE_POSTGRES_ADMIN_PASSWORD=postgres
+      - ZITADEL_DATABASE_POSTGRES_ADMIN_SSL_MODE=disable
+      - ZITADEL_DATABASE_POSTGRES_USER_USERNAME=zitadel
+      - ZITADEL_DATABASE_POSTGRES_USER_PASSWORD=zitadel
+      - ZITADEL_DATABASE_POSTGRES_USER_SSL_MODE=disable
+      - ZITADEL_FIRSTINSTANCE_LOGINCLIENTPATPATH=/current-dir/login-client.pat
+      - ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_USERNAME=login-client
+      - ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_NAME=Automatically Initialized IAM_LOGIN_CLIENT
+      - ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_PAT_EXPIRATIONDATE=2029-01-01T00:00:00Z
+      - ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_REQUIRED=true
+      - ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_BASEURI=https://${LAZYCAT_APP_DOMAIN}/ui/v2/login
+      - ZITADEL_OIDC_DEFAULTLOGINURLV2=https://${LAZYCAT_APP_DOMAIN}/ui/v2/login/login?authRequest=
+      - ZITADEL_OIDC_DEFAULTLOGOUTURLV2=https://${LAZYCAT_APP_DOMAIN}/ui/v2/login/logout?post_logout_redirect=
+      - ZITADEL_SAML_DEFAULTLOGINURLV2=https://${LAZYCAT_APP_DOMAIN}/ui/v2/login/login?samlRequest=
+      - ZITADEL_LOG_LEVEL=debug
+      - ZITADEL_LOGSTORE_ACCESS_STDOUT_ENABLED=true
+    depends_on:
+      - db
+    binds:
+      - /lzcapp/var/current-dir:/current-dir
+    health_check:
+      test:
+        - CMD
+        - /app/zitadel
+        - ready
+      start_period: 10s
+
+  login:
+    restart: unless-stopped
+    image: ghcr.io/zitadel/zitadel-login:latest
+    user: root
+    environment:
+      - ZITADEL_API_URL=https://${LAZYCAT_APP_DOMAIN}
+      - NEXT_PUBLIC_BASE_PATH=/ui/v2/login
+      - ZITADEL_SERVICE_USER_TOKEN_FILE=/current-dir/login-client.pat
+    depends_on:
+      - zitadel
+    binds:
+      - /lzcapp/var/current-dir:/current-dir
+
+  db:
+    restart: unless-stopped
+    image: postgres:17
+    environment:
+      - PGUSER=postgres
+      - POSTGRES_PASSWORD=postgres
+    binds:
+      - /lzcapp/var/data:/var/lib/postgresql/data
+    health_check:
+      test:
+        - CMD-SHELL
+        - pg_isready -d zitadel -U postgres
+      start_period: 20s
