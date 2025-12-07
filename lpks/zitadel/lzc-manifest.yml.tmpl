@@ -46,7 +46,8 @@ homepage: https://github.com/zitadel/zitadel
 author: sebastiaan
 
 ext_config:
-  disable_grpc_web_on_root: true # 不劫持 grpc-web 流量 (配合新版 sdk)
+  # SDK should not hijack GRPC calls.
+  disable_grpc_web_on_root: true
 
 application:
   background_task: true
@@ -94,6 +95,10 @@ services:
       - ZITADEL_OIDC_DEFAULTLOGINURLV2=https://${LAZYCAT_APP_DOMAIN}/ui/v2/login/login?authRequest=
       - ZITADEL_OIDC_DEFAULTLOGOUTURLV2=https://${LAZYCAT_APP_DOMAIN}/ui/v2/login/logout?post_logout_redirect=
       - ZITADEL_SAML_DEFAULTLOGINURLV2=https://${LAZYCAT_APP_DOMAIN}/ui/v2/login/login?samlRequest=
+      - ZITADEL_FIRSTINSTANCE_PATPATH=/current-dir/admin.pat
+      - ZITADEL_FIRSTINSTANCE_ORG_MACHINE_MACHINE_USERNAME=admin
+      - ZITADEL_FIRSTINSTANCE_ORG_MACHINE_MACHINE_NAME=Automatically Initialized IAM_OWNER
+      - ZITADEL_FIRSTINSTANCE_ORG_MACHINE_PAT_EXPIRATIONDATE=2029-01-01T00:00:00Z
       - ZITADEL_LOG_LEVEL=debug
       - ZITADEL_LOGSTORE_ACCESS_STDOUT_ENABLED=true
     depends_on:
