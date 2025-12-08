@@ -24,6 +24,7 @@ services:
     image: rustfs/rustfs:latest
     binds:
       - /lzcapp/var/data:/data
+      - /lzcapp/var/app/logs:/app/logs
       - /lzcapp/var/config:/config/rustfs
     environment:
       - RUSTFS_ACCESS_KEY={{ .RUSTFS_ACCESS_KEY }}
