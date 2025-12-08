@@ -14,6 +14,8 @@ application:
     - protocol: tcp
       port: 9000
       service: rustfs
+  health_check:
+      disable: true
 services:
   rustfs:
     restart: unless-stopped
