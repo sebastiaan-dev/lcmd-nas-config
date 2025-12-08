@@ -4,7 +4,7 @@ package: cloud.lazycat.app.sebastiaan.rustfs
 version: 1.0.0
 application:
   routes:
-    - /=http://rustfs:9000
+    - /=http://rustfs:9001
   subdomain: rustfs
   background_task: true
   public_path:
@@ -13,10 +13,6 @@ application:
     # S3 API
     - protocol: tcp
       port: 9000
-      service: rustfs
-    # Console
-    - protocol: tcp
-      port: 9001
       service: rustfs
 services:
   rustfs:
