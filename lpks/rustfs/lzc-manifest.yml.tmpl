@@ -1,6 +1,6 @@
 lzc-sdk-version: 0.1
 name: rustfs
-package: white.lazycat.app.rustfs
+package: cloud.lazycat.app.sebastiaan.rustfs
 version: 1.0.0
 application:
   routes:
@@ -25,7 +25,6 @@ services:
     binds:
       - /lzcapp/var/data:/data
       - /lzcapp/var/app/logs:/app/logs
-      - /lzcapp/var/config:/config/rustfs
     environment:
       - RUSTFS_ACCESS_KEY={{ .RUSTFS_ACCESS_KEY }}
       - RUSTFS_SECRET_KEY={{ .RUSTFS_SECRET_KEY }}
@@ -43,3 +42,15 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+  volume-permission-helper:
+    image: alpine
+    binds:
+      - /lzcapp/var/data:/data
+      - /lzcapp/var/app/logs:/app/logs
+    command: >
+      sh -c "
+        chown -R 10001:10001 /data /app/logs &&
+        echo 'Volume Permissions fixed' &&
+        exit 0
+      "
+    restart: no
