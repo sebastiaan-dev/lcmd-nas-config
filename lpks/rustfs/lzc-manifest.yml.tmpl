@@ -4,8 +4,7 @@ package: white.lazycat.app.rustfs
 version: 1.0.0
 application:
   routes:
-    - /=http://rustfs:9001
-    - /=http://rustfs:9000
+    - /=http://rustfs
   subdomain: rustfs
   background_task: true
   public_path:
@@ -27,8 +26,11 @@ services:
       - /lzcapp/var/data:/data
       - /lzcapp/var/config:/config/rustfs
     environment:
-      - RUSTFS_ROOT_USER={{ .RUSTFS_ROOT_USER }}
-      - RUSTFS_ROOT_PASSWORD={{ .RUSTFS_ROOT_PASSWORD }}
+      - RUSTFS_ACCESS_KEY={{ .RUSTFS_ACCESS_KEY }}
+      - RUSTFS_SECRET_KEY={{ .RUSTFS_SECRET_KEY }}
+      - RUSTFS_CONSOLE_ENABLE=true
+      - RUSTFS_SERVER_DOMAINS=${LAZYCAT_APP_DOMAIN}
+      - RUSTFS_ADDRESS=:9000
     healthcheck:
       test:
         [
