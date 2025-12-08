@@ -1,0 +1,42 @@
+lzc-sdk-version: 0.1
+name: rustfs
+package: white.lazycat.app.rustfs
+version: 1.0.0
+application:
+  routes:
+    - /=http://rustfs:9001
+    - /=http://rustfs:9000
+  subdomain: rustfs
+  background_task: true
+  public_path:
+    - /api/public
+  ingress:
+    # S3 API
+    - protocol: tcp
+      port: 9000
+      service: rustfs
+    # Console
+    - protocol: tcp
+      port: 9001
+      service: rustfs
+services:
+  rustfs:
+    restart: unless-stopped
+    image: rustfs/rustfs:latest
+    binds:
+      - /lzcapp/var/data:/data
+      - /lzcapp/var/config:/config/rustfs
+    environment:
+      - RUSTFS_ROOT_USER={{ .RUSTFS_ROOT_USER }}
+      - RUSTFS_ROOT_PASSWORD={{ .RUSTFS_ROOT_PASSWORD }}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "sh", "-c",
+          "curl -f http://rustfs:9000/health && curl -f http://rustfs:9001/rustfs/console/health"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
