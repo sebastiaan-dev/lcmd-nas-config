@@ -22,8 +22,6 @@ services:
       - /lzcapp/var/data:/data
       - /lzcapp/var/app/logs:/app/logs
     environment:
-      # - RUSTFS_ACCESS_KEY={{ .RUSTFS_ACCESS_KEY }}
-      # - RUSTFS_SECRET_KEY={{ .RUSTFS_SECRET_KEY }}
       - RUSTFS_CONSOLE_ENABLE=true
       # - RUSTFS_SERVER_DOMAINS=${LAZYCAT_APP_DOMAIN}
       - RUSTFS_CORS_ALLOWED_ORIGINS=*
