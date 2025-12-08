@@ -27,3 +27,15 @@ services:
       - RUSTFS_CONSOLE_ENABLE=true
       - RUSTFS_SERVER_DOMAINS=${LAZYCAT_APP_DOMAIN}
       - RUSTFS_ADDRESS=:9000
+  volume-permission-helper:
+    image: alpine
+    binds:
+      - /lzcapp/var/data:/data
+      - /lzcapp/var/app/logs:/app/logs
+    command: >
+      sh -c "
+        chown -R 10001:10001 /data /app/logs &&
+        echo 'Volume Permissions fixed' &&
+        exit 0
+      "
+    restart: "no"
