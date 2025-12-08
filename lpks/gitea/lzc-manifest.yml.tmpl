@@ -27,8 +27,8 @@ services:
     restart: always
     binds:
       - /lzcapp/var/gitea:/data
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
+      # - /etc/timezone:/etc/timezone:ro
+      # - /etc/localtime:/etc/localtime:ro
     depends_on:
       - db
 
