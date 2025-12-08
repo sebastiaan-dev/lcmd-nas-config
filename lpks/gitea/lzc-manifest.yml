@@ -1,0 +1,43 @@
+lzc-sdk-version: 0.1
+name: gitea
+package: cloud.lazycat.app.sebastiaan.gitea
+version: 1.25.2
+application:
+  routes:
+    - /=http://gitea.cloud.lazycat.app.gitea.lzcapp:3000
+  subdomain: gitea
+  background_task: true
+  public_path:
+    - /
+  ingress:
+    - protocol: tcp
+      port: 22
+      service: gitea
+services:
+  gitea:
+    image: docker.gitea.com/gitea:1.25.2
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=db:5432
+      - GITEA__database__NAME=gitea
+      - GITEA__database__USER=gitea
+      - GITEA__database__PASSWD=gitea
+    restart: always
+    binds:
+      - /lzcapp/var/gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - db
+
+  db:
+    image: docker.io/library/postgres:14
+    restart: always
+    environment:
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
+    binds:
+      - /lzcapp/var/db/postgres:/var/lib/postgresql/data
