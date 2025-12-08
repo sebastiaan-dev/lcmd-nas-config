@@ -31,17 +31,7 @@ services:
       - RUSTFS_CONSOLE_ENABLE=true
       - RUSTFS_SERVER_DOMAINS=${LAZYCAT_APP_DOMAIN}
       - RUSTFS_ADDRESS=:9000
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "sh", "-c",
-          "curl -f http://rustfs:9000/health && curl -f http://rustfs:9001/rustfs/console/health"
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+
   volume-permission-helper:
     image: alpine
     binds:
