@@ -68,7 +68,7 @@ application:
 services:
   zitadel:
     restart: unless-stopped
-    image: ghcr.io/zitadel/zitadel:latest
+    image: ghcr.io/zitadel/zitadel:v4.7.5
     user: root
     command: start-from-init --masterkey "{{ .MASTER_KEY }}"
     environment:
@@ -96,9 +96,13 @@ services:
       - ZITADEL_OIDC_DEFAULTLOGOUTURLV2=https://${LAZYCAT_APP_DOMAIN}/ui/v2/login/logout?post_logout_redirect=
       - ZITADEL_SAML_DEFAULTLOGINURLV2=https://${LAZYCAT_APP_DOMAIN}/ui/v2/login/login?samlRequest=
       - ZITADEL_FIRSTINSTANCE_MACHINEKEYPATH=/current-dir/zitadel-admin-sa.json
-      - ZITADEL_FIRSTINSTANCE_ORG_MACHINE_MACHINE_USERNAME=admin
-      - ZITADEL_FIRSTINSTANCE_ORG_MACHINE_MACHINE_NAME=Automatically Initialized IAM_OWNER
       - ZITADEL_FIRSTINSTANCE_ORG_MACHINE_PAT_EXPIRATIONDATE=2029-01-01T00:00:00Z
+      - ZITADEL_FIRSTINSTANCE_ORG_MACHINE_MACHINE_USERNAME={{ .MACHINE_USERNAME }}
+      - ZITADEL_FIRSTINSTANCE_ORG_MACHINE_MACHINE_NAME={{ .MACHINE_NAME }}
+      - ZITADEL_FIRSTINSTANCE_ORG_MACHINE_MACHINEKEY_EXPIRATIONDATE=2029-01-01T00:00:00Z
+      - ZITADEL_FIRSTINSTANCE_ORG_HUMAN_USERNAME={{ .HUMAN_USERNAME }}
+      - ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORD={{ .HUMAN_PASSWORD }}
+      - ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED=false
       - ZITADEL_LOG_LEVEL=debug
       - ZITADEL_LOGSTORE_ACCESS_STDOUT_ENABLED=true
     depends_on:
@@ -114,7 +118,7 @@ services:
 
   login:
     restart: unless-stopped
-    image: ghcr.io/zitadel/zitadel-login:latest
+    image: ghcr.io/zitadel/zitadel-login:v4.7.5
     user: root
     environment:
       - ZITADEL_API_URL=https://${LAZYCAT_APP_DOMAIN}
